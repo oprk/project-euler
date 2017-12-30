@@ -6,6 +6,8 @@
 
 # Implement prime sieve.
 
+import math
+
 def primes(max_num):
   prime_bitmap = [True for x in xrange(max_num)]
   prime_bitmap[0] = False
@@ -16,11 +18,19 @@ def primes(max_num):
       for j in xrange(i**2, max_num, i):
         prime_bitmap[j] = False
 
-def prime_factors(num):
-  max_factor = int(num**0.5)
-  for prime in primes(max_factor):
+def smallest_prime_factor(num):
+  max_factor = int(num ** 0.5) + 1
+  for prime in primes(max_factor + 1):
     if num % prime == 0:
-      yield prime
+      return prime
+  # num itself is prime (or 1).
+  return num
 
-list(prime_factors(600851475143))[-1]
-# 6857
+def prime_factors(num):
+  while num > 1:
+    prime_factor = smallest_prime_factor(num)
+    num /= prime_factor
+    yield prime_factor
+
+max(prime_factors(600851475143))
+
