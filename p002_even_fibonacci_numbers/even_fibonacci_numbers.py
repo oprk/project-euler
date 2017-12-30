@@ -19,3 +19,14 @@ def even_fibonacci_numbers(max_num):
 
 even_fibonacci_numbers(4*10**6)
 # 4613732
+
+
+def even_fibonacci_numbers_v2(max_num):
+  (a, b) = (1, 2)
+  while a < max_num:
+    if a % 2 == 0:
+      yield a
+    (a, b) = (b, a + b)
+
+sum(even_fibonacci_numbers_v2(4*10**6))
+# 4613732
