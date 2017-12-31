@@ -69,31 +69,6 @@ def sum_divisors(num):
 assert sum_divisors(1) == 0
 assert sum_divisors(12) == 16
 
-memo = {}
-def abundant_number(num):
-  if num not in memo:
-    memo[num] = sum_divisors(num) > num
-  return memo[num]
-
-assert abundant_number(12)
-
-def abundant_sum(n):
-  for a in xrange(1, n / 2 + 1):
-    if abundant_number(a):
-      b = n - a
-      if abundant_number(b):
-        return True
-  return False
-
-# t0 = time.time()
-# result = sum(i for i in xrange(1, 28123 + 1) if not abundant_sum(i))
-# t1 = time.time()
-# print(result)
-# print('time %f' % (t1 - t0))
-# # 4179871
-# # time 4.077985
-
-
 # Speed things up by caching and only checking abundant numbers.
 t0 = time.time()
 
@@ -117,4 +92,4 @@ t1 = time.time()
 print result
 print('time %f' % (t1 - t0))
 # 4179871
-# time 1.002296
+# time 0.988464
