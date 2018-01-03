@@ -21,7 +21,7 @@
 import time
 
 t0 = time.time()
-products=set([])
+products = set([])
 for a in range(4, 99):
   if a % 10 and a % 11:
     for b in range(123, 10000 / a):
