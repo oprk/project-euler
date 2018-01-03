@@ -21,16 +21,16 @@
 import time
 
 t0 = time.time()
-products = 0
+products=set([])
 for a in range(4, 99):
   if a % 10 and a % 11:
     for b in range(123, 10000 / a):
       c = a * b
       nums = set(list(str(a) + str(b) + str(c)))
       if len(nums) == 9 and not '0' in nums:
-        products += c
+        products.add(c)
 t1 = time.time()
-print(products)
+print sum(products)
 print('time %f' % (t1 - t0))
 # 45228
 # time 0.028677
