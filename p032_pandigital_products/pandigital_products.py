@@ -23,7 +23,8 @@ import time
 pandigital_set = [str(i) for i in xrange(1, 10)]
 
 def pandigital_product(a, b):
-  s = str(a) + str(b) + str(a * b)
+  c = a * b
+  s = str(a) + str(b) + str(c)
   return sorted(s) == pandigital_set
 
 assert pandigital_product(39, 186)
@@ -46,14 +47,18 @@ def split_groups(collection, num_groups):
   for assignment in assign_groups(len(collection), num_groups):
     yield split_group(collection, num_groups, assignment)
 
-def collection_to_int(collection):
-  return int(''.join(str(c) for c in collection))
+def digits_to_int(collection):
+  result = 0
+  for elt in collection:
+    result *= 10
+    result += elt
+  return result
 
 def smallest_value(collection):
-  return collection_to_int(sorted(collection))
+  return digits_to_int(sorted(collection))
 
 def largest_value(collection):
-  return collection_to_int(reversed(sorted(collection)))
+  return digits_to_int(reversed(sorted(collection)))
 
 def permutation(collection):
   if not collection:
@@ -83,9 +88,9 @@ def generate_pandigital_products():
     if smallest_value(a) > largest_c or smallest_value(b) > largest_c:
       continue
     for a_digits in permutation(a):
-      a_int = collection_to_int(a_digits)
+      a_int = digits_to_int(a_digits)
       for b_digits in permutation(b):
-        b_int = collection_to_int(b_digits)
+        b_int = digits_to_int(b_digits)
         if pandigital_product(a_int, b_int):
           prod = a_int * b_int
           prods.add(prod)
@@ -98,4 +103,4 @@ t1 = time.time()
 print(result)
 print('time %f' % (t1 - t0))
 # 45228
-# time 0.378714
+# time 0.277365
