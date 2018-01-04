@@ -38,3 +38,13 @@ print(total)
 print('time %f' % (t1 - t0))
 # 872187
 # time 0.004788
+
+# Compare with brute force example, just in case.
+t0 = time.time()
+result = sum(i for i in xrange(1, 10**6)
+             if palindrome(str(i)) and palindrome("{0:b}".format(i)))
+t1 = time.time()
+print(result)
+print('time %f' % (t1 - t0))
+# 872187
+# time 0.570948
