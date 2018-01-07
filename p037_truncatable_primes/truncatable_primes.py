@@ -10,22 +10,13 @@
 
 # NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
 
-# def primes(max_num):
-#   if max_num >= 2:
-#     prime_bitmap = [True for i in xrange(max_num)]
-#     prime_bitmap[0] = False
-#     prime_bitmap[1] = False
-#     for i in xrange(max_num):
-#       if prime_bitmap[i]:
-#         yield i
-#         for j in xrange(i**2, max_num, i):
-#           prime_bitmap[j] = False
+import time
 
 class Prime:
   def __init__(self):
     self.max_num = 0
     self.prime_bitmap = []
-    self.prime_set = set([])
+    self.prime_lst = []
 
   def mark_prime(self, max_num):
     # Double each time max_num is exceeded.
@@ -37,13 +28,9 @@ class Prime:
       self.prime_bitmap[1] = False
       for i in xrange(self.max_num):
         if self.prime_bitmap[i]:
-          self.prime_set.add(i)
+          self.prime_lst.append(i)
           for j in xrange(i**2, self.max_num, i):
             self.prime_bitmap[j] = False
-
-  def is_prime(self, num):
-    self.mark_prime(num + 1)
-    return num in self.prime_set
 
 primes = Prime()
 
@@ -55,13 +42,30 @@ def truncate_left(s):
 def truncate_right(s):
   return s[:-1]
 
+# Look at all the truncatable primes we've generated so far, and observe that
+# adding a 1, 3, 7 or 9 would not make it prime; then we know we have to stop.
+# How many truncatable from left primes can we make before we have to stop?
+
+# Save time on primality test by only computing primes up to square root.
+def is_prime(num):
+  if num < 2:
+    return False
+  max_num = int(num ** 0.5) + 1
+  primes.mark_prime(max_num)
+  for p in primes.prime_lst:
+    if p >= max_num:
+      break
+    if num % p == 0:
+      return False
+  return True
+
 # s is str(integer).
 def truncatable_prime(s, truncate_direction, memo):
   if not s:
     return True
   else:
     if s not in memo:
-      memo[s] = (primes.is_prime(int(s)) and
+      memo[s] = (is_prime(int(s)) and
                  truncatable_prime(truncate_direction(s),
                                    truncate_direction, memo))
     return memo[s]
@@ -74,14 +78,32 @@ memo_right = {}
 def truncatable_prime_from_right(s):
   return truncatable_prime(s, truncate_right, memo_right)
 
-primes.mark_prime(1000000)
 
-for p in primes.prime_set:
-  if truncatable_prime_from_left(str(p)) and truncatable_prime_from_right(str(p)):
-    print(p)
+t0 = time.time()
 
-# [k for k in memo_left if memo_left[k]]
+d = 1
+truncatable_from_right = {1 : ['2', '3', '5', '7']}
+while truncatable_from_right[d]:
+  d += 1
+  truncatable_from_right[d] = []
+  for t in truncatable_from_right[d - 1]:
+    for p in ['1', '3', '7', '9']:
+      if truncatable_prime_from_right(t + p):
+        truncatable_from_right[d].append(t + p)
 
-# Look at all the truncatable primes we've generated so far, and observe that
-# adding a 1, 3, 7 or 9 would not make it prime; then we know we have to stop.
-# How many truncatable from left primes can we make before we have to stop?
+total = 0
+for d in truncatable_from_right:
+  # Single digit primes are not truncatable.
+  if d == 1:
+    continue
+  for p in truncatable_from_right[d]:
+    if truncatable_prime_from_left(p):
+      total += int(p)
+
+t1 = time.time()
+
+
+print(total)
+print('time %f' % (t1 - t0))
+# 748317
+# time 0.024879
