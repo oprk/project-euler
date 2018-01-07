@@ -64,7 +64,7 @@ def int_digits_to_int(digit_lst):
 # # 16695334890
 # # time 19.837629
 
-def unique_digit_multiples(prime, max_digits):
+def digit_multiples(prime, max_digits):
   i = 1
   n = prime
   max_num = 10 ** max_digits - 1
@@ -72,9 +72,7 @@ def unique_digit_multiples(prime, max_digits):
     digits = str(n)
     # Pad to correct number of zeros.
     digits = '0' * (max_digits - len(digits)) + digits
-    # Does n contain 3 unique digits?
-    if len(set(digits)) == max_digits:
-      yield digits
+    yield digits
     i += 1
     n += prime
 
@@ -87,7 +85,7 @@ def helper(primes, ending):
   else:
     prime = primes[0]
     rest_primes = primes[1:]
-    for digits in unique_digit_multiples(prime, 3):
+    for digits in digit_multiples(prime, 3):
       if not ending or digit_overlap(2, digits, ending):
         new_ending = digits[0] + ending if ending else digits
         # Digits are unique so far.
@@ -103,4 +101,4 @@ t1 = time.time()
 print(result)
 print('time %f' % (t1 - t0))
 # 16695334890
-# time 0.022178
+# time 0.013977
