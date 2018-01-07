@@ -55,5 +55,11 @@ for perm in permutations(list(xrange(10))):
 t1 = time.time()
 print(total)
 print('time %f' % (t1 - t0))
+# 1406357289
+# 1430952867
+# 1460357289
+# 4106357289
+# 4130952867
+# 4160357289
 # 16695334890
 # time 19.837629
