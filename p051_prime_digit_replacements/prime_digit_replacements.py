@@ -15,6 +15,7 @@
 # value family.
 
 import copy
+import time
 
 def primes(max_num):
   if max_num >= 2:
@@ -46,11 +47,9 @@ def digit_list_to_int(digit_list):
   return n
 
 def replace_digits_prime(prime, digits_index_lst):
-  print('replace_digits_prime')
   if not digits_index_lst:
-    return 0
+    return
   prime_digits = int_digit_list(prime)
-  count = 0
   for i in xrange(10):
     new_prime_digits = copy.copy(prime_digits)
     for digit_i in digits_index_lst:
@@ -60,14 +59,11 @@ def replace_digits_prime(prime, digits_index_lst):
       continue
     new_prime = digit_list_to_int(new_prime_digits)
     if new_prime in primes_set:
-      print(new_prime)
-      count += 1
-  print('count: %d' % count)
-  return count
+      yield new_prime
 
-assert replace_digits_prime(2, [0]) == 4
-assert replace_digits_prime(13, [0]) == 6
-assert replace_digits_prime(56003, [2, 3]) == 7
+assert len(list(replace_digits_prime(2, [0]))) == 4
+assert len(list(replace_digits_prime(13, [0]))) == 6
+assert len(list(replace_digits_prime(56003, [2, 3]))) == 7
 
 def num_digits(n):
   count = 0
@@ -88,11 +84,23 @@ def all_possible_subsets(collection):
 
 def replace_n_digits(prime):
   n = num_digits(prime)
-  return max(replace_digits_prime(prime, digits_index_lst)
-             for digits_index_lst in all_possible_subsets(list(xrange(n))))
+  best_count = 0
+  best_primes = []
+  for digits_index_lst in all_possible_subsets(list(xrange(n))):
+    primes = list(replace_digits_prime(prime, digits_index_lst))
+    count = len(primes)
+    if best_count < count:
+      best_count = count
+      best_primes = primes
+  return (best_count, best_primes)
 
-# for prime in primes_lst:
-#   n = replace_n_digits(prime)
-#   if n == 8:
-#     print(prime, n)
-#     break
+t0 = time.time()
+for prime in primes_lst:
+  best_count, best_primes = replace_n_digits(prime)
+  if best_count == 8:
+    print(best_primes[0])
+    break
+t1 = time.time()
+print('time %f' % (t1 - t0))
+# 121313
+# time 6.809785
