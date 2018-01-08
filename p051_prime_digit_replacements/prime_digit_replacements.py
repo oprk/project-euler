@@ -73,26 +73,19 @@ def num_digits(n):
     count += 1
   return count
 
-def all_possible_subsets(collection):
-  if not collection:
-    yield []
-  else:
-    car = collection[0]
-    cdr = collection[1:]
-    for subset in all_possible_subsets(cdr):
-      yield subset
-      yield [car] + subset
-
 def replace_n_digits(prime):
   n = num_digits(prime)
   best_count = 0
   best_primes = []
-  for digits_index_lst in all_possible_subsets(list(xrange(n))):
-    primes = list(replace_digits_prime(prime, digits_index_lst))
-    count = len(primes)
-    if best_count < count:
-      best_count = count
-      best_primes = primes
+  str_prime = str(prime)
+  # Replace the most common digit.
+  digit = Counter(str_prime).most_common()[0][0]
+  digits_index_lst = [i for i in xrange(n) if str_prime[i] == digit]
+  primes = list(replace_digits_prime(prime, digits_index_lst))
+  count = len(primes)
+  if best_count < count:
+    best_count = count
+    best_primes = primes
   return (best_count, best_primes)
 
 t0 = time.time()
@@ -109,4 +102,4 @@ for prime in primes_lst:
 t1 = time.time()
 print('time %f' % (t1 - t0))
 # 121313
-# time 1.038911
+# time 0.118459
