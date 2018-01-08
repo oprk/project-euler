@@ -44,11 +44,13 @@ def tph(n):
   ts = triangular_sequence()
   ps = pentagonal_sequence()
   hs = hexagonal_sequence()
-  t = next(ts)
-  p = next(ps)
-  h = next(hs)
+  t = 0
+  p = 0
+  h = 0
   i = 0
-  while True:
+  while i < n:
+    # Break symmetry by advancing one of the sequences.
+    t = next(ts)
     while not (t == p == h):
       m = max(t, p, h)
       while t < m:
@@ -58,10 +60,7 @@ def tph(n):
       while h < m:
         h = next(hs)
     i += 1
-    if i == n:
-      return t
-    # Break symmetry by advancing one of the sequences.
-    t = next(ts)
+  return t
 
 t0 = time.time()
 result = tph(3)
@@ -69,4 +68,4 @@ t1 = time.time()
 print(result)
 print('time %f' % (t1 - t0))
 # 1533776805
-# time 0.053399
+# time 0.050072
