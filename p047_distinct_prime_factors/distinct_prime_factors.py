@@ -14,62 +14,28 @@
 # Find the first four consecutive integers to have four distinct prime factors
 # each. What is the first of these numbers?
 
-from collections import Counter
+import time
 
-class Primes:
-  def __init__(self):
-    self.max_num = 1
-    self.prime_bitmap = [False for i in xrange(2)]
-    self.prime_lst = []
-
-  def mark_prime(self, n):
-    new_max_num = max(n, self.max_num * 2)
-    self.prime_bitmap += [True for i in xrange(self.max_num, new_max_num + 1)]
-    self.prime_lst = []
-    for i in xrange(new_max_num + 1):
-      if self.prime_bitmap[i]:
-        self.prime_lst.append(i)
-        for j in xrange(i**2, new_max_num + 1, i):
-          self.prime_bitmap[j] = False
-
-  def is_prime(self, n):
-    self.mark_prime(n)
-    return self.prime_bitmap[n]
-
-  def prime_factors(self, n):
-    max_num = int(n ** 0.5) + 1
-    self.mark_prime(max_num)
-    factors = Counter()
-    for prime in self.prime_lst:
-      while n % prime == 0:
-        factors[prime] += 1
-        n /= prime
-      if n == 1:
-        return factors
-    if n != 1:
-      # n itself is prime.
-      factors[n] += 1
-    return factors
-
-p = Primes()
-
-a = 1
-b = 2
-c = 3
-num_factors_a = len(p.prime_factors(a))
-num_factors_b = len(p.prime_factors(b))
-num_factors_c = len(p.prime_factors(c))
-
-while True:
-  d = c + 1
-  num_factors_d = len(p.prime_factors(d))
-  if num_factors_a == num_factors_b == num_factors_c == num_factors_d == 4:
-    break
-  a = b
-  b = c
-  c = d
-  num_factors_a = num_factors_b
-  num_factors_b = num_factors_c
-  num_factors_c = num_factors_d
-
-print(a)
+t0 = time.time()
+# Search under 1 million for now.
+max_num = 1000000
+# Number of prime factors.
+factors = [0] * max_num
+count = 0
+for i in xrange(2, max_num):
+  if factors[i] == 0:
+    # i is prime
+    count = 0
+    for j in xrange(i, max_num, i):
+      factors[j] += 1
+  elif factors[i] == 4:
+    count += 1
+    if count == 4:
+      print i - 3 # First number
+      break
+  else:
+    count = 0
+t1 = time.time()
+print('time %f' % (t1 - t0))
+# 134043
+# time 0.345344
