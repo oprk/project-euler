@@ -14,6 +14,7 @@
 # necessarily adjacent digits) with the same digit, is part of an eight prime
 # value family.
 
+from collections import Counter
 import copy
 import time
 
@@ -95,7 +96,12 @@ def replace_n_digits(prime):
   return (best_count, best_primes)
 
 t0 = time.time()
+# No need to check primes with 2 or 4 recurring digits.  If you form 8 different
+# numbers with them, at least once the sum of the digits (and the whole number)
+# is divisible by 3.
 for prime in primes_lst:
+  if Counter(str(prime)).most_common()[0][1] != 3:
+    continue
   best_count, best_primes = replace_n_digits(prime)
   if best_count == 8:
     print(best_primes[0])
@@ -103,4 +109,4 @@ for prime in primes_lst:
 t1 = time.time()
 print('time %f' % (t1 - t0))
 # 121313
-# time 6.809785
+# time 1.038911
