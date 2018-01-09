@@ -264,22 +264,16 @@ assert (rank(['AS', '2C', 'QS', '3C', 'KS']) ==
 def sorted_hand_values(hand):
   return list(reversed(sorted(Poker.values[c] for c in hand_values(hand))))
 
-# Not true; break tie by highest "interesting" card, not highest card in whole
-# hand.
 def player1_wins(game):
   player1_hand = game[:5]
-  player2_hand = game[(5 + 1):]
-  player1_rank = rank(player1_hand)
-  player2_rank = rank(player2_hand)
-  return  (player1_rank < player2_rank or
-           (player1_rank == player2_rank and
-            sorted_hand_values(player1_hand) >
-            sorted_hand_values(player2_hand)))
+  player2_hand = game[5:]
+  return rank(player1_hand) > rank(player2_hand)
+
 
 with open('poker.txt', 'r') as csvfile:
   reader = csv.reader(csvfile, delimiter=' ')
   games = [row for row in reader]
-  # result = sum(player1_wins(game) for game in games)
+  result = sum(player1_wins(game) for game in games)
 
 print(result)
-# 511
+# 376
