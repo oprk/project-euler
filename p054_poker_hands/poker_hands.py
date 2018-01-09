@@ -52,7 +52,36 @@ import csv
 import operator
 
 values = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
-suites = ['H', 'S', 'D', 'C']
+# suites = ['H', 'S', 'D', 'C']
+
+class Poker:
+  high_card = 0
+  one_pair = 1
+  two_pairs = 2
+  three_of_a_kind = 3
+  straight = 4
+  flush = 5
+  full_house = 6
+  four_of_a_kind = 7
+  straight_flush = 8
+  royal_flush = 9
+
+  values = {
+    '2': 2,
+    '3': 3,
+    '4': 4,
+    '5': 5,
+    '6': 6,
+    '7': 7,
+    '8': 8,
+    '9': 9,
+    'T': 10,
+    'J': 11,
+    'Q': 12,
+    'K': 13,
+    'A': 14
+  }
+
 
 def hand_suites(hand):
   return [card[1] for card in hand]
@@ -60,32 +89,39 @@ def hand_suites(hand):
 def hand_values(hand):
   return [card[0] for card in hand]
 
-def flush(hand):
-  return len(set(hand_suites(hand))) == 1
+def ordered_hand_value_ranks(hand):
+  return list(reversed(sorted(Poker.values[value] for value in hand_values(hand))))
 
-assert flush(['2D', '3D', '4D', '5D', '6D'])
-assert not flush(['2H', '3D', '4D', '5D', '6D'])
+def flush(hand):
+  if len(set(hand_suites(hand))) != 1:
+    return None
+  else:
+    return (Poker.flush, ordered_hand_value_ranks(hand))
+
+assert flush(['2D', '3D', '4D', '5D', '6D']) == (Poker.flush, [6, 5, 4, 3, 2])
+assert flush(['2H', '3D', '4D', '5D', '6D']) is None
 
 def royal_flush(hand):
-  if not flush(hand):
-    return False
-  return set(hand_values(hand)) == set(['T', 'J', 'Q', 'K', 'A'])
+  if flush(hand) and set(hand_values(hand)) == set(['T', 'J', 'Q', 'K', 'A']):
+    return (Poker.royal_flush, ordered_hand_value_ranks(hand))
+  return None
 
-assert royal_flush(['AH', 'KH', 'QH', 'JH', 'TH'])
-assert not royal_flush(['AH', 'KS', 'QH', 'JH', 'TH'])
-assert not royal_flush(['AH', '2H', 'QH', 'JH', 'TH'])
+assert royal_flush(['AH', 'KH', 'QH', 'JH', 'TH']) == (Poker.royal_flush, [14, 13, 12, 11, 10])
+assert royal_flush(['AH', 'KS', 'QH', 'JH', 'TH']) is None
+assert royal_flush(['AH', '2H', 'QH', 'JH', 'TH']) is None
 
 def straight(hand):
-  order = list(sorted(values.index(value) for value in hand_values(hand)))
+  order = ordered_hand_value_ranks(hand)
   curr = order[0]
   rest = order[1:]
   for elt in rest:
-    if elt - curr != 1:
-      return False
+    if curr - elt != 1:
+      return None
     curr = elt
-  return True
+  return (Poker.straight, order)
 
-assert straight(['4S', '3H', '2H', '5D', '6C'])
+assert straight(['4S', '3H', '2H', '5D', '6C']) == (Poker.straight, [6, 5, 4, 3, 2])
+assert straight(['4S', '3H', '2H', 'TD', '6C']) is None
 
 def straight_flush(hand):
   return straight(hand) and flush(hand)
@@ -94,46 +130,84 @@ assert straight_flush(['4S', '3S', '2S', '5S', '6S'])
 assert not straight_flush(['4S', '3H', '2H', '5D', '6C'])
 
 def four_of_a_kind(hand):
-  return Counter(hand_values(hand)).most_common()[0][1] == 4
+  most_common = Counter(hand_values(hand)).most_common()
+  if most_common[0][1] == 4:
+    four = [Poker.values[most_common[0][0]]] * 4
+    single = [Poker.values[most_common[1][0]]]
+    return (Poker.four_of_a_kind, four + single)
+  return None
 
-assert four_of_a_kind(['AH', 'AS', 'AD', 'AC', '2H'])
-assert not four_of_a_kind(['AH', 'AS', 'AD', 'TC', '2H'])
+assert (four_of_a_kind(['AH', 'AS', 'AD', 'AC', '2H']) ==
+        (Poker.four_of_a_kind, [14, 14, 14, 14, 2]))
+assert four_of_a_kind(['AH', 'AS', 'AD', 'TC', '2H']) is None
 
 def three_of_a_kind(hand):
   most_common = Counter(hand_values(hand)).most_common()
-  return (len(most_common) > 2 and
-          most_common[0][1] == 3 and
-          most_common[1][1] == 1)
+  if (len(most_common) > 2 and
+      most_common[0][1] == 3 and
+      most_common[1][1] == 1):
+    three = [Poker.values[most_common[0][0]]] * 3
+    singles = list(reversed(sorted(
+      [Poker.values[most_common[i][0]] for i in xrange(1, 3)])))
+    return (Poker.three_of_a_kind, three + singles)
+  return None
 
-assert three_of_a_kind(['AH', 'AS', 'AD', 'TC', '2H'])
-assert not three_of_a_kind(['AH', 'AS', 'AD', 'AC', '2H'])
+assert (three_of_a_kind(['AH', 'AS', 'AD', 'TC', '2H']) ==
+        (Poker.three_of_a_kind, [14, 14, 14, 10, 2]))
+assert three_of_a_kind(['AH', 'AS', 'AD', 'AC', '2H']) is None
 
 def full_house(hand):
   most_common = Counter(hand_values(hand)).most_common()
-  return (len(most_common) == 2 and
-          most_common[0][1] == 3 and
-          most_common[1][1] == 2)
+  if (len(most_common) == 2 and
+      most_common[0][1] == 3 and
+      most_common[1][1] == 2):
+    three = [Poker.values[most_common[0][0]]] * 3
+    pair = [Poker.values[most_common[1][0]]] * 2
+    return (Poker.full_house, three + pair)
+  return None
 
-assert full_house(['3S', '2S', '2C', '3D', '3H'])
-assert not full_house(['3S', '2S', 'QC', '3D', '3H'])
+assert (full_house(['2S', '3S', '3C', '2D', '2H']) ==
+        (Poker.full_house, [2, 2, 2, 3, 3]))
+assert full_house(['3S', '2S', 'QC', '3D', '3H']) is None
 
 def two_pairs(hand):
   most_common = Counter(hand_values(hand)).most_common()
-  return (len(most_common) > 2 and
-          most_common[0][1] == 2 and
-          most_common[1][1] == 2)
+  if (len(most_common) > 2 and
+      most_common[0][1] == 2 and
+      most_common[1][1] == 2):
+    pairs = list(reversed(sorted(
+      ([Poker.values[most_common[0][0]]] * 2) +
+      ([Poker.values[most_common[1][0]]] * 2))))
+    single = [Poker.values[most_common[2][0]]]
+    return (Poker.two_pairs, pairs + single)
+  return None
 
-assert two_pairs(['QS', 'QH', '3C', '3D', 'AS'])
-assert not two_pairs(['QS', 'QH', '3C', '4D', 'AS'])
-assert not two_pairs(['KS', 'QH', '3C', '3D', 'AS'])
+assert (two_pairs(['QS', 'QH', '3C', '3D', 'AS']) ==
+        (Poker.two_pairs, [12, 12, 3, 3, 14]))
+assert two_pairs(['QS', 'QH', '3C', '4D', 'AS']) is None
+assert two_pairs(['KS', 'QH', '3C', '3D', 'AS']) is None
 
 def one_pair(hand):
   most_common = Counter(hand_values(hand)).most_common()
-  return (len(most_common) > 2 and
-          most_common[0][1] == 2 and
-          most_common[1][1] == 1)
+  if (len(most_common) > 2 and
+      most_common[0][1] == 2 and
+      most_common[1][1] == 1):
+    pair = [Poker.values[most_common[0][0]]] * 2
+    singles = list(reversed(sorted(
+      [Poker.values[most_common[i][0]] for i in xrange(1, 4)])))
+    return (Poker.one_pair, pair + singles)
+  return None
 
-assert one_pair(['KS', 'KH', 'TC', '3H', '7H'])
+assert (one_pair(['KS', 'KH', 'TC', '3H', '7H']) ==
+        (Poker.one_pair, [13, 13, 10, 7, 3]))
+
+def high_card(hand):
+  most_common = Counter(hand_values(hand)).most_common()
+  if (len(most_common) == 5 and
+      straight(hand) is None and
+      flush(hand) is None):
+    return (Poker.high_card, ordered_hand_value_ranks(hand))
+  return None
 
 # Lower numerical rank is better.
 def rank(hand):
@@ -146,49 +220,66 @@ def rank(hand):
     straight,
     three_of_a_kind,
     two_pairs,
-    one_pair
+    one_pair,
+    high_card
   ]
-  for i in xrange(len(hand_rank)):
-    if hand_rank[i](hand):
-      return i
-  # high_card is last tested, defaults to true.  All hands have some high card.
-  return len(hand_rank)
+  for f in hand_rank:
+    result = f(hand)
+    if result is not None:
+      return result
+  # This case should be impossible.
+  assert False
 
 # Royal flush.
-assert (rank(['AH', 'KH', 'QH', 'JH', 'TH']) == 0 and
+assert (rank(['AH', 'KH', 'QH', 'JH', 'TH']) ==
         royal_flush(['AH', 'KH', 'QH', 'JH', 'TH']))
 # Straight flush.
-assert (rank(['4S', '3S', '2S', '5S', '6S']) == 1 and
+assert (rank(['4S', '3S', '2S', '5S', '6S']) ==
         straight_flush(['4S', '3S', '2S', '5S', '6S']))
 # Four of a kind.
-assert (rank(['AH', 'AS', 'AD', 'AC', '2H']) == 2 and
+assert (rank(['AH', 'AS', 'AD', 'AC', '2H']) ==
         four_of_a_kind(['AH', 'AS', 'AD', 'AC', '2H']))
 # Full house.
-assert (rank(['3S', '2S', '2C', '3D', '3H']) == 3 and
+assert (rank(['3S', '2S', '2C', '3D', '3H']) ==
         full_house(['3S', '2S', '2C', '3D', '3H']))
 # Flush.
-assert (rank(['2D', '3D', '4D', '5D', 'QD']) == 4 and
+assert (rank(['2D', '3D', '4D', '5D', 'QD']) ==
         flush(['2D', '3D', '4D', '5D', 'QD']))
 # Straight.
-assert (rank(['2D', '3D', '4D', '5D', '6C']) == 5 and
+assert (rank(['2D', '3D', '4D', '5D', '6C']) ==
         straight(['2D', '3D', '4D', '5D', '6C']))
 # Three of a kind.
-assert (rank(['AH', 'AS', 'AD', 'TC', '2H']) == 6 and
+assert (rank(['AH', 'AS', 'AD', 'TC', '2H']) ==
         three_of_a_kind(['AH', 'AS', 'AD', 'TC', '2H']))
 # Two pairs.
-assert (rank(['QS', 'QH', '3C', '3D', 'AS']) == 7 and
+assert (rank(['QS', 'QH', '3C', '3D', 'AS']) ==
         two_pairs(['QS', 'QH', '3C', '3D', 'AS']))
 # One pair.
-assert (rank(['KS', 'KH', 'TC', '3H', '7H']) == 8 and
+assert (rank(['KS', 'KH', 'TC', '3H', '7H']) ==
         one_pair(['KS', 'KH', 'TC', '3H', '7H']))
-
 # High card.
-assert rank(['AS', '2C', 'QS', '3C', 'KS']) == 9
+assert (rank(['AS', '2C', 'QS', '3C', 'KS']) ==
+        high_card(['AS', '2C', 'QS', '3C', 'KS']))
 
-def game_winner(game):
+def sorted_hand_values(hand):
+  return list(reversed(sorted(Poker.values[c] for c in hand_values(hand))))
+
+# Not true; break tie by highest "interesting" card, not highest card in whole
+# hand.
+def player1_wins(game):
   player1_hand = game[:5]
   player2_hand = game[(5 + 1):]
+  player1_rank = rank(player1_hand)
+  player2_rank = rank(player2_hand)
+  return  (player1_rank < player2_rank or
+           (player1_rank == player2_rank and
+            sorted_hand_values(player1_hand) >
+            sorted_hand_values(player2_hand)))
 
 with open('poker.txt', 'r') as csvfile:
   reader = csv.reader(csvfile, delimiter=' ')
   games = [row for row in reader]
+  # result = sum(player1_wins(game) for game in games)
+
+print(result)
+# 511
