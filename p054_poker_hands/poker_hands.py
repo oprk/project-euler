@@ -51,9 +51,6 @@ from collections import Counter
 import csv
 import operator
 
-values = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
-# suites = ['H', 'S', 'D', 'C']
-
 class Poker:
   high_card = 0
   one_pair = 1
