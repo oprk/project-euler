@@ -50,8 +50,6 @@ def decrypt_ascii_values(text, key):
   key_ord = [ord(elt) for elt in key]
   return [text[i] ^ key_ord[i % key_length]
           for i in xrange(text_length)]
-  # return ''.join([chr(text[i] ^ key_ord[i % key_length])
-  #                 for i in xrange(text_length)])
 
 with open('p059_cipher.txt', 'r') as csvfile:
   reader = csv.reader(csvfile, delimiter=',')
