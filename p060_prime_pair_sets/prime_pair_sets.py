@@ -10,11 +10,6 @@
 # Find the lowest sum for a set of five primes for which any two primes
 # concatenate to produce another prime.
 
-# First find pairs of primes that, when concatenated together, form another prime.
-
-# Then, starting at each such pair of primes, look at their neighboring primes
-# and see if it's possible to add them to current set.
-
 import time
 from collections import defaultdict
 
