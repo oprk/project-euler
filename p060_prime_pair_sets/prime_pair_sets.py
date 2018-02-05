@@ -11,87 +11,73 @@
 # concatenate to produce another prime.
 
 import time
-from collections import defaultdict
 
-def primes(max_num):
-  if max_num >= 2:
-    prime_lst = [True] * max_num
-    prime_lst[0] = False
-    prime_lst[1] = False
-    for i in xrange(max_num):
-      if prime_lst[i]:
-        yield i
-        for j in xrange(i**2, max_num, i):
-          prime_lst[j] = False
+def sieve(limit):
+    yield 2
+    np = set()
+    for x in range(3, limit, 2):
+        if x in np:
+            continue
+        yield x
+        np.update(range(x + x, limit, x))
 
-t0 = time.time()
-max_num = 100000000
-prime_lst = list(primes(max_num))
-prime_set = set(prime_lst)
-t1 = time.time()
 
-print('prime_lst initialized, time: %f' % (t1 - t0))
+_known_primes = set(sieve(100))
 
-def is_prime(num):
-  return num in prime_set
 
-def num_digits(num):
-  count = 0
-  while num != 0:
-    count += 1
-    num /= 10
-  return count
+# Modified Miller-Rabin algorithm
+def is_prime(n, k=16):
+    if n < 2:
+        return False
+    if n in _known_primes:
+        return True
+    for p in _known_primes:
+        if n % p == 0:
+            return False
+    d, s = n - 1, 0
+    while d & 1 == 0:
+        d, s = (d >> 1, s + 1)
 
-def concat_nums(num1, num2):
-  return num1 * 10 ** num_digits(num2) + num2
+    # Returns exact according to http://primes.utm.edu/prove/prove2_3.html
+    for a in (2, 3):
+        if pow(a, d, n) == 1:
+            continue
+        is_composite = True
+        for i in range(s):
+            if pow(a, (1 << i) * d, n) == n - 1:
+                is_composite = False
+                break
+        if is_composite:
+            return False
+    return True
 
-def split_num(num):
-  right = 0
-  left = num
-  place = 1
-  while left > 10:
-    digit = left % 10
-    right += digit * place
-    left /= 10
-    place *= 10
-    if digit != 0:
-      yield (left, right)
 
-prime_concat_pairs = defaultdict(set)
-
-for prime in prime_lst:
-  for left, right in split_num(prime):
-    if (is_prime(left) and
-        is_prime(right) and
-        is_prime(concat_nums(right, left))):
-      prime_concat_pairs[left].add(right)
-      prime_concat_pairs[right].add(left)
-
-print('prime_concat_pairs initialized, time: %f' % (t1 - t0))
-
-def recurse_compatible(candidate_set):
-  if len(candidate_set) == 0:
-    yield []
-  else:
-    for prime in candidate_set:
-      for rest in recurse_compatible(candidate_set & prime_concat_pairs[prime]):
-        yield [prime] + rest
+def answer():
+    primes_with_str = [
+        (i, str(p), p)
+        for i, p in enumerate(sieve(10000))
+    ]
+    primes_with_str.pop(0)
+    c_able = {
+        pa: {
+            pb for _, sb, pb in primes_with_str[i:]
+            if is_prime(int(sa + sb)) and is_prime(int(sb + sa))
+        }
+        for i, sa, pa in primes_with_str
+    }
+    return next(
+        pa + pb + pc + pd + pe
+        for pa, ca in ((pa, c_able[pa]) for pa in c_able)
+        for pb, cab in ((pb, ca.intersection(c_able[pb])) for pb in ca)
+        for pc, cabc in ((pc, cab.intersection(c_able[pc])) for pc in cab)
+        for pd, cabcd in ((pd, cabc.intersection(c_able[pd])) for pd in cabc)
+        for pe in cabcd
+    )
 
 t0 = time.time()
-best = None
-for prime in prime_lst:
-  foo = recurse_compatible(prime_concat_pairs[prime])
-  for elt in foo:
-    if len(elt) >= 4:
-      whole_sequence = [prime] + elt
-      s = sum(whole_sequence)
-      if best is None or best > s:
-        best = s
+result = answer()
 t1 = time.time()
-print best
+print(result)
 print('time: %f' % (t1 - t0))
-
-# prime_lst initialized, time: 26.751045
-# prime_concat_pairs initialized, time: 26.751045
-# [13, 8389, 5701, 6733, 5197] 26033
-# time: 15.958320
+# 26033
+# time: 1.881190
