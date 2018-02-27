@@ -10,11 +10,6 @@
 # notation √23 = [4;(1,3,1,8)], to indicate that the block (1,3,1,8) repeats
 # indefinitely.
 
-def gcd(a, b):
-  while a != 0:
-    a, b = b % a, a
-  return b
-
 def helper(numerator, n, subtrahend):
   #   numerator / (sqrt(n) - subtrahend)
   # = ((numerator * (sqrt(n) + subtrahend)) /
@@ -22,10 +17,8 @@ def helper(numerator, n, subtrahend):
   denominator = n - (subtrahend ** 2)
   assert denominator > 0
   # Simplify numerator / denominator
-  cd = gcd(numerator, denominator)
-  numerator /= cd
-  denominator /= cd
-  assert numerator == 1
+  assert denominator % numerator == 0
+  denominator /= numerator
 
   side_add = int((n**0.5 + subtrahend) / denominator)
   new_subtrahend = side_add * denominator - subtrahend
