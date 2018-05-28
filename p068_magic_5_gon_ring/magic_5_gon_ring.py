@@ -58,33 +58,18 @@ def perm_to_string(perm):
   return "".join(["".join(str(x) for x in ray(outer, inner, i))
                   for i in xrange(n)])
 
-# Find the eight 3-gon solutions.
-# n = 3
-# for perm in permutation(list(xrange(1, (n * 2) + 1))):
-#   if first_smallest(perm[:n]) and magic(perm):
-#     print perm, perm_to_string(perm)
-
-# [1, 2, 3, 5, 6, 4] 156264345
-# [1, 3, 2, 6, 5, 4] 165354246
-# [1, 3, 5, 4, 6, 2] 146362524
-# [1, 5, 3, 6, 4, 2] 164542326
-# [2, 4, 6, 3, 5, 1] 235451613
-# [2, 6, 4, 5, 3, 1] 253631415
-# [4, 5, 6, 2, 3, 1] 423531612
-# [4, 6, 5, 3, 2, 1] 432621513
-
 # Find the 5-gon solutions.  Just go backwards and see.
-t0 = time.time()
-n = 5
-for perm in permutation(list(reversed(xrange(1, (n * 2) + 1)))):
-  if first_smallest(perm[:n]) and magic(perm):
-    s = perm_to_string(perm)
-    print perm, s, len(s)
-    break
-t1 = time.time()
-print("time: %f" % (t1 - t0))
-# [6, 10, 9, 8, 7, 5, 3, 1, 4, 2] 6531031914842725 16
-# time: 8.401537
+# t0 = time.time()
+# n = 5
+# for perm in permutation(list(reversed(xrange(1, (n * 2) + 1)))):
+#   if first_smallest(perm[:n]) and magic(perm):
+#     s = perm_to_string(perm)
+#     print perm, s, len(s)
+#     break
+# t1 = time.time()
+# print("time: %f" % (t1 - t0))
+# # [6, 10, 9, 8, 7, 5, 3, 1, 4, 2] 6531031914842725 16
+# # time: 8.401537
 
 # Not reversed:
 # [1, 2, 3, 4, 5, 8, 10, 7, 9, 6] 18102107379496568
@@ -99,3 +84,37 @@ print("time: %f" % (t1 - t0))
 # [2, 10, 8, 6, 4, 9, 5, 1, 7, 3] 2951051817673439
 # [6, 7, 8, 9, 10, 3, 5, 2, 4, 1] 6357528249411013
 # [6, 10, 9, 8, 7, 5, 3, 1, 4, 2] 6531031914842725
+
+# Solution from the forum that is much better than my brute force solution:
+t0 = time.time()
+constraint = [lambda c: True] * 10
+# 10 must be in outer ring.
+constraint[0] = lambda c: c[0] == 10
+constraint[4] = lambda c: c[0] + c[1] == c[3] + c[4]
+constraint[6] = lambda c: c[2] + c[3] == c[5] + c[6]
+constraint[8] = lambda c: c[4] + c[5] == c[7] + c[8]
+constraint[9] = lambda c: c[6] + c[7] == c[1] + c[9]
+
+sides, rots = [0,1,2,3,2,4,5,4,6,7,6,8,9,8,1], []
+for i in range(0, len(sides), 3): rots.append(sides[i:] + sides[:i])
+
+search, sols = [[]], []
+while len(search) > 0:
+  c = search.pop()
+  left = set(range(1, 11)) - set(c)
+  # If all numbers are used, we have a magic permutation.
+  if len(left) == 0: sols.append(c)
+  for cv in left:
+    # Add a number from number of digits left, check that the constraint for
+    # that position is satisfied so far.  If the constraint is satisfied, the
+    # partial solution is appended to the search.
+    if constraint[len(c)](c + [cv]): search.append(c + [cv])
+
+for sol in sols:
+    sol[:] = min([sol[cidx] for cidx in rot] for rot in rots)
+
+print reduce(lambda a, b: a + b, map(str, max(sols)))
+t1 = time.time()
+print("time: %f" % (t1 - t0))
+# 6531031914842725
+# time: 0.018464
