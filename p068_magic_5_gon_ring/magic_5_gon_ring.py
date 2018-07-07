@@ -88,7 +88,7 @@ def perm_to_string(perm):
 # Solution from the forum that is much better than my brute force solution:
 t0 = time.time()
 constraint = [lambda c: True] * 10
-# 10 must be in outer ring.
+# 10 must be in outer ring, in order for first digit to be max 6.
 constraint[0] = lambda c: c[0] == 10
 constraint[4] = lambda c: c[0] + c[1] == c[3] + c[4]
 constraint[6] = lambda c: c[2] + c[3] == c[5] + c[6]
