@@ -15,24 +15,24 @@ How many fractions lie between 1/3 and 1/2 in the sorted set of reduced proper f
 import time
 
 # Brute force approach.
-# t0 = time.time()
-# fractions = set()
+t0 = time.time()
+fractions = set()
 
-# low = 1.0 / 3
-# high = 1.0 / 2
+low = 1.0 / 3
+high = 1.0 / 2
 
-# max_num = 12000
-# for d in xrange(2, max_num + 1):
-#   start_n = d / 3
-#   end_n = d / 2
-#   for n in xrange(start_n, end_n + 1):
-#     f = float(n) / d
-#     if low < f and f < high:
-#       fractions.add(float(n) / d)
+max_num = 12000
+for d in xrange(2, max_num + 1):
+  start_n = d / 3
+  end_n = d / 2
+  for n in xrange(start_n, end_n + 1):
+    f = float(n) / d
+    if low < f and f < high:
+      fractions.add(f)
 
-# t1 = time.time()
-# print(len(fractions), t1 - t0)
-# (7295372, 11.093400955200195)
+t1 = time.time()
+print(len(fractions), t1 - t0)
+# (7295372, 9.739489078521729)
 
 
 # http://mathworld.wolfram.com/Stern-BrocotTree.html
