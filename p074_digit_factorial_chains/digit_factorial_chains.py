@@ -64,3 +64,13 @@ print result
 # 4079 has 3 * 3 * 2 permutations: 18
 # 223974 has 6! / 2! permutations: 360
 # 360 + 24 + 18 = 402
+
+# >>> sum_fact(1479)
+# sum_fact(1479)
+# 367945
+# >>> sum_fact(4079)
+# sum_fact(4079)
+# 367945
+# >>> sum_fact(223974)
+# sum_fact(223974)
+# 367954
