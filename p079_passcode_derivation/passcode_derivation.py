@@ -19,18 +19,19 @@ def match_all_expressions(passcode, expressions):
   return True
 
 # Simple but slow solution:
-with open('p079_keylog.txt', 'r') as keylog_file:
-  # Create regular expressions
-  wildcard = '.*'
-  expressions = []
-  for line in keylog_file:
-    expressions.append(wildcard + wildcard.join(line.strip()) + wildcard)
+def result():
+  with open('p079_keylog.txt', 'r') as keylog_file:
+    # Create regular expressions
+    wildcard = '.*'
+    expressions = []
+    for line in keylog_file:
+      expressions.append(wildcard + wildcard.join(line.strip()) + wildcard)
 
-  for passcode in range(100000000):
-    if match_all_expressions(str(passcode), expressions):
-      print(passcode)
-      break
+    for passcode in range(100000000):
+      if match_all_expressions(str(passcode), expressions):
+        return passcode
 
+# print(result())
 #73162890
 
 """
@@ -56,3 +57,39 @@ way to perform this toposort.  "
 We can do topological sort if we assume that the digits don't repeat.
 
 """
+
+def find_last(edge_map):
+  for char in edge_map:
+    if not edge_map[char]:
+      return char
+
+# Assuming that the passcode doesn't contain repeating characters, we can do a topological sort.
+def topological_sort(edge_map):
+  reversed_passcode = []
+  while edge_map:
+    # Find character that doesn't have any other characters after it.  That will
+    # be the last character in the passcode.
+    char = find_last(edge_map)
+    reversed_passcode.append(char)
+    edge_map.pop(char)
+    # Remove edges to 'char'.
+    for other_char in edge_map:
+      edge_map[other_char].remove(char)
+  return ''.join(reversed(reversed_passcode))
+
+with open('p079_keylog.txt', 'r') as keylog_file:
+  # Edge map.
+  edge_map = {}
+  for line in keylog_file:
+    characters = line.strip()
+    for i in range(len(characters)):
+      char = characters[i]
+      if char not in edge_map:
+        edge_map[char] = set()
+      for after_char in characters[i + 1:]:
+        edge_map[char].add(after_char)
+  print(edge_map)
+  print(topological_sort(edge_map))
+
+# defaultdict(<class 'set'>, {'3': {'0', '1', '6', '2', '8', '9'}, '1': {'0', '6', '2', '8', '9'}, '6': {'0', '2', '9', '8'}, '8': {'9', '0'}, '9': {'0'}, '2': {'9', '8', '0'}, '7': {'0', '1', '3', '6', '2', '8', '9'}})
+# 73162890
